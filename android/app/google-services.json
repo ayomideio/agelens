@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "414238529271",
+    "project_id": "readmit-predictor",
+    "storage_bucket": "readmit-predictor.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:414238529271:android:c42eb68810bce18b39a5f2",
+        "android_client_info": {
+          "package_name": "com.example.readmitpredictor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtG9STBp6XG_2R82v3VCsGXkpWvuMIt14"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
