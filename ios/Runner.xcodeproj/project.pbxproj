@@ -107,7 +107,6 @@
 				0F0DCD50AC10D967C0E4C9A4 /* Pods-RunnerTests.release.xcconfig */,
 				40760619143B52A43DE78573 /* Pods-RunnerTests.profile.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -496,6 +495,7 @@
 				DEVELOPMENT_TEAM = GR64L8L673;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ShopSupport;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -679,6 +679,7 @@
 				DEVELOPMENT_TEAM = GR64L8L673;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ShopSupport;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -702,6 +703,7 @@
 				DEVELOPMENT_TEAM = GR64L8L673;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ShopSupport;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

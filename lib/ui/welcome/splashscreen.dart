@@ -65,7 +65,7 @@ class _SplashScreenState extends State<SplashScreen>
       Navigator.of(context).pushReplacement(PageRouteBuilder(
           pageBuilder: (_, __, ___) =>
               // UpdateKyc()
-              Welcome(),
+             HomeScreen(),
               // HomeScreen(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             const begin = Offset(1.0, 0.0);

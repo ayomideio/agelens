@@ -16,8 +16,19 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<Offset> _animation;
-    RemoteConfigUpdate? update;
+  RemoteConfigUpdate? update;
 
+  // Define a default email body text
+  final String defaultEmailBody =
+      "Hello, I am Victor, your personal guide from Shopify. "
+      "I recently came across your store while reviewing the weekly report I received as a certified Shopify partner. "
+      "I must say, I am truly impressed with the exceptional work you have accomplished thus far. "
+      "Upon analyzing your store, I noticed that although you have taken proactive measures to generate sales, "
+      "there seem to be several technical issues hindering the conversion of your daily traffic into customers. "
+      "Glitches, broken links, and bugs are impacting the overall functionality of your store. "
+      "I want to assist in resolving these issues and elevating your store to a higher level. "
+      "By improving the user experience and setting the broken links, we can enhance your ability to convert daily traffic into repeat customers. "
+      "Can I proceed???";
   @override
   void initState() {
     super.initState();
@@ -42,6 +53,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animationController.forward();
     });
+
+    // Initialize the email body controller with default text
+    _emailBodyController.text = defaultEmailBody;
   }
 
   @override
@@ -51,130 +65,108 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   }
 
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _allMedCountController = TextEditingController();
-  final TextEditingController _timeInHospitalController =
-      TextEditingController();
-  final TextEditingController _totalNumProceduresController =
-      TextEditingController();
-  final TextEditingController _diabetesMedsCountController =
-      TextEditingController();
-  final TextEditingController _numComorbidityController =
-      TextEditingController();
-  final TextEditingController _numberVisitController = TextEditingController();
-  final TextEditingController _ageController = TextEditingController();
 
-  String? _changeValue;
-  String? _diabetesMedValue;
-
-  Map<String, dynamic>? _response;
+  final TextEditingController _emailBodyController = TextEditingController();
+  final TextEditingController _emailListsController = TextEditingController();
   bool _isLoading = false;
+  int _successCount = 0;
+  int _failureCount = 0;
+  int _totalEmailsSent = 0;
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
+        _successCount = 0;
+        _failureCount = 0;
       });
 
-        final FirebaseRemoteConfig remoteConfig =
-                                  FirebaseRemoteConfig.instance;
-                              // Using zero duration to force fetching from remote server.
-                              await remoteConfig.setConfigSettings(
-                                RemoteConfigSettings(
-                                  fetchTimeout: const Duration(seconds: 10),
-                                  minimumFetchInterval: Duration.zero,
-                                ),
-                              );
-                              await remoteConfig.fetchAndActivate();
-                              print(
-                                  'Fetched: ${remoteConfig.getString('api_url')}');
-                              // var apiKey = remoteConfig.getString('numverify_key');
+      List<String> emailList = _emailListsController.text.split('\n');
+      int batchSize = 10;
+      int delayInMinutes = 15;
+
+      for (int i = 0; i < emailList.length; i += batchSize) {
+        List<String> batch = emailList
+            .sublist(
+                i,
+                i + batchSize > emailList.length
+                    ? emailList.length
+                    : i + batchSize)
+            .where((email) => email.trim().isNotEmpty)
+            .toList();
+
+        await _sendBatch(batch);
+
+        if (i + batchSize < emailList.length) {
+          await Future.delayed(Duration(minutes: delayInMinutes));
+        }
+      }
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      _showResponseDialog();
+    }
+  }
+
+  Future<void> _sendBatch(List<String> batch) async {
+    for (String email in batch) {
+      String endpoint = '';
+      if (_totalEmailsSent >= 2000) {
+        endpoint = 'http://18.225.156.117:5000/api/sendsupportIntromail';
+      } else if (_totalEmailsSent >= 1000) {
+        endpoint = 'http://18.225.156.117:5000/api/sendmaintenancemail';
+      } else {
+        endpoint = 'http://18.225.156.117:5000/api/sendsupportmail';
+      }
 
       final response = await http.post(
-        Uri.parse(remoteConfig.getString('api_url')),
+        Uri.parse(endpoint),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
-          'all_med_count': int.parse(_allMedCountController.text),
-          'time_in_hospital': int.parse(_timeInHospitalController.text),
-          'total_num_procedures': int.parse(_totalNumProceduresController.text),
-          'diabetes_Meds_count': int.parse(_diabetesMedsCountController.text),
-          'change': _changeValue == 'yes' ? 1 : 0,
-          'num_comorbidity': int.parse(_numComorbidityController.text),
-          'diabetesMed': _diabetesMedValue == 'yes' ? 1 : 0,
-          'number_visit': int.parse(_numberVisitController.text),
-          'age': int.parse(_ageController.text),
+          'email_body': _emailBodyController.text,
+          'email': email.trim(),
         }),
       );
 
       if (response.statusCode == 200) {
         setState(() {
-          _response = jsonDecode(response.body);
-          _isLoading = false;
+          _successCount++;
         });
-        _showResponseDialog();
       } else {
         setState(() {
-          _isLoading = false;
+          _failureCount++;
         });
-        // Handle error
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${response.reasonPhrase}')),
-        );
       }
+
+      setState(() {
+        _totalEmailsSent++;
+      });
     }
   }
 
-void _showResponseDialog() {
-    String message;
-    Icon icon;
-    if (_response != null) {
-      if (_response!['random_forest'] == 1) {
-        message = 'Readmission risk';
-        icon = Icon(Icons.warning, color: Colors.red, size: 40);
-      } else {
-        message = 'No readmission risk';
-        icon = Icon(Icons.check_circle, color: Colors.green, size: 40);
-      }
-    } else {
-      message = 'No response';
-      icon = Icon(Icons.error, color: Colors.grey, size: 40);
-    }
-
+  void _showResponseDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Readmission Risk'),
-          content:
-          
-          Row(
+          title: Text('Email Sending Result'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              icon,
-              SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  message,
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
+              Text('Emails sent successfully: $_successCount'),
+              Text('Emails not successful: $_failureCount'),
             ],
           ),
-          
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 setState(() {
-                  _response = null;
-                  _allMedCountController.clear();
-                  _timeInHospitalController.clear();
-                  _totalNumProceduresController.clear();
-                  _diabetesMedsCountController.clear();
-                  _changeValue = null;
-                  _numComorbidityController.clear();
-                  _diabetesMedValue = null;
-                  _numberVisitController.clear();
-                  _ageController.clear();
+                  // _emailBodyController.clear();
+                  _emailListsController.clear();
                 });
                 Navigator.of(context).pop();
               },
@@ -186,8 +178,8 @@ void _showResponseDialog() {
     );
   }
 
-  Widget _buildTextFormField(
-      TextEditingController controller, String labelText) {
+  Widget _buildTextFormField(TextEditingController controller, String labelText,
+      {int maxLines = 1}) {
     return Container(
       width: 300,
       margin: EdgeInsets.symmetric(vertical: 8.0),
@@ -203,43 +195,11 @@ void _showResponseDialog() {
           contentPadding:
               EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         ),
-        keyboardType: TextInputType.number,
+        keyboardType: TextInputType.text,
+        maxLines: maxLines,
         validator: (value) {
           if (value == null || value.isEmpty) {
             return 'Please enter $labelText';
-          }
-          return null;
-        },
-      ),
-    );
-  }
-
-  Widget _buildDropdownField(String labelText, String? value, void Function(String?) onChanged) {
-    return Container(
-      width: 300,
-      margin: EdgeInsets.symmetric(vertical: 8.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15.0),
-        border: Border.all(color: Colors.grey),
-      ),
-      child: DropdownButtonFormField<String>(
-        value: value,
-        decoration: InputDecoration(
-          labelText: labelText,
-          border: InputBorder.none,
-          contentPadding:
-              EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        ),
-        items: ['yes', 'no'].map((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-        onChanged: onChanged,
-        validator: (value) {
-          if (value == null) {
-            return 'Please select $labelText';
           }
           return null;
         },
@@ -264,49 +224,24 @@ void _showResponseDialog() {
               child: Column(
                 children: [
                   SizedBox(height: 10),
-                  Padding(
-                    padding: EdgeInsets.only(top: 2),
-                    child: Text(
-                      "The green checkmark indicates there is no readmission risk, while the red icon indicates there is a readmission risk.",
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w300,
-                      ),
-                    ),
-                  ),
+                  Text(_totalEmailsSent.toString()),
                   Form(
                     key: _formKey,
                     child: Column(
                       children: <Widget>[
+                        // _buildTextFormField(_emailNameController, 'Email Name'),
+                        // _buildTextFormField(_subjectController, 'Subject'),
+                        _buildTextFormField(_emailBodyController, 'Email Body',
+                            maxLines: 5),
                         _buildTextFormField(
-                            _allMedCountController, 'All Medication Counts'),
-                        _buildTextFormField(
-                            _timeInHospitalController, 'Time in Hospital'),
-                        _buildTextFormField(_totalNumProceduresController,
-                            'Total number of procedures'),
-                        _buildTextFormField(_diabetesMedsCountController,
-                            'Diabetes Medication Counts'),
-                        _buildDropdownField('Change of Diabetes Medication', _changeValue, (value) {
-                          setState(() {
-                            _changeValue = value;
-                          });
-                        }),
-                        _buildTextFormField(
-                            _numComorbidityController, 'Number of Comorbidity'),
-                        _buildDropdownField('Diabetes Medication', _diabetesMedValue, (value) {
-                          setState(() {
-                            _diabetesMedValue = value;
-                          });
-                        }),
-                        _buildTextFormField(
-                            _numberVisitController, 'Number of Visit'),
-                        _buildTextFormField(_ageController, 'Age'),
+                            _emailListsController, 'Email Lists',
+                            maxLines: 8),
                         SizedBox(height: 20),
                         _isLoading
                             ? CircularProgressIndicator()
                             : ElevatedButton(
                                 onPressed: _submitForm,
-                                child: Text('Submit'),
+                                child: Text('Send'),
                               ),
                         SizedBox(height: 20),
                       ],

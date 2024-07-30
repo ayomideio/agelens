@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:readmitpredictor/ui/auth/phone.dart';
+import 'package:readmitpredictor/ui/user-taskbar/homescreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -142,7 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Padding(
                       padding: EdgeInsets.fromLTRB(22, 0, 0, 0),
                       child: Text(
-                        'Email',
+                        'Hospital Number',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -264,11 +265,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 InkWell(
                   onTap: () {
+                    
                     Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (BuildContext build) =>
-                                TwoStepPhoneScreen()));
+                                HomeScreen()));
                   },
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(0, 30, 0, 5),

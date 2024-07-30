@@ -1,76 +1,61 @@
-import 'package:shared_preferences/shared_preferences.dart';
-
-import 'models/shipments.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class wallets extends StatefulWidget {
-  final String selectedTab;
-
-  final fullname;
-  final String telephone;
-  const wallets(
-      {super.key,
-      required this.selectedTab,
-      required this.fullname,
-      required this.telephone});
+class Wallets extends StatefulWidget {
+  final String fullname;
+  final String phone;
+  const Wallets({Key? key, required this.fullname, required this.phone})
+      : super(key: key);
 
   @override
-  State<wallets> createState() => _walletsState();
+  State<Wallets> createState() => _WalletsState();
 }
 
-class _walletsState extends State<wallets> with SingleTickerProviderStateMixin {
+class _WalletsState extends State<Wallets> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
-  late Animation<double> _slideAnimation;
-  List<Shipments> filteredShipments = [];
+  late Animation<Offset> _animation;
+  RemoteConfigUpdate? update;
+
+  // Define a default email body text
+  final String defaultEmailBody =
+      "Hello, I am Victor, your personal guide from Shopify. "
+      "I recently came across your store while reviewing the weekly report I received as a certified Shopify partner. "
+      "I must say, I am truly impressed with the exceptional work you have accomplished thus far. "
+      "Upon analyzing your store, I noticed that although you have taken proactive measures to generate sales, "
+      "there seem to be several technical issues hindering the conversion of your daily traffic into customers. "
+      "Glitches, broken links, and bugs are impacting the overall functionality of your store. "
+      "I want to assist in resolving these issues and elevating your store to a higher level. "
+      "By improving the user experience and setting the broken links, we can enhance your ability to convert daily traffic into repeat customers. "
+      "Can I proceed???";
   @override
   void initState() {
     super.initState();
+
     _animationController = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 500),
     );
-    _slideAnimation =
-        Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
+
+    final startPosition = Offset(1.0, 0.0);
+    final endPosition = Offset.zero;
+
+    _animation = Tween<Offset>(
+      begin: startPosition,
+      end: endPosition,
+    ).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animationController.forward();
     });
-    updateFilteredShipments();
-  }
 
-  @override
-  void didUpdateWidget(wallets oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.selectedTab != oldWidget.selectedTab) {
-      _animationController.reset();
-      _animationController.forward();
-      updateFilteredShipments();
-    }
-  }
-
-  void updateFilteredShipments() {
-    setState(() {
-      filteredShipments = sortShipmentsByStatus(widget.selectedTab);
-    });
-  }
-
-  List<Shipments> sortShipmentsByStatus(String status) {
-    List<Shipments> matchedList = [];
-    List<Shipments> remainingList = [];
-
-    for (var shipment in shipments_) {
-      if (shipment.status == status) {
-        matchedList.add(shipment);
-      } else {
-        remainingList.add(shipment);
-      }
-    }
-    if (!status.isEmpty) {
-      return matchedList;
-    } else {
-      return shipments_;
-    }
-
-    // [...matchedList, ...remainingList];
+    // Initialize the email body controller with default text
+    _emailBodyController.text = defaultEmailBody;
   }
 
   @override
@@ -79,267 +64,187 @@ class _walletsState extends State<wallets> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  String selectedStatus = '';
-  List<Shipments> shipments_ = [
-    Shipments(
-        status: 'in-progress',
-        title: 'Arriving today!',
-        subTitle:
-            'Your delivery #NEJ20089934122231 \n from Atlanta, is arriving today!',
-        amount: '\$1400 USD',
-        deliveryDate: 'Sep 20,2023'),
-    Shipments(
-        status: 'pending',
-        title: 'Arriving today!',
-        subTitle:
-            'Your delivery #NEJ20089934122231 \n from Atlanta, is arriving today!',
-        amount: '\$1400 USD',
-        deliveryDate: 'Sep 20,2023'),
-    Shipments(
-        status: 'pending',
-        title: 'Arriving today!',
-        subTitle:
-            'Your delivery #NEJ20089934122231 \n from Atlanta, is arriving today!',
-        amount: '\$1400 USD',
-        deliveryDate: 'Sep 20,2023'),
-    Shipments(
-        status: 'loading',
-        title: 'Arriving today!',
-        subTitle:
-            'Your delivery #NEJ20089934122231 \n from Atlanta, is arriving today!',
-        amount: '\$1400 USD',
-        deliveryDate: 'Sep 20,2023'),
-    Shipments(
-        status: 'loading',
-        title: 'Arriving today!',
-        subTitle:
-            'Your delivery #NEJ20089934122231 \n from Atlanta, is arriving today!',
-        amount: '\$1400 USD',
-        deliveryDate: 'Sep 20,2023'),
-    Shipments(
-        status: 'in-progress',
-        title: 'Arriving today!',
-        subTitle:
-            'Your delivery #NEJ20089934122231 \n from Atlanta, is arriving today!',
-        amount: '\$1400 USD',
-        deliveryDate: 'Sep 20,2023'),
-    Shipments(
-        status: 'in-progress',
-        title: 'Arriving today!',
-        subTitle:
-            'Your delivery #NEJ20089934122231 \n from Atlanta, is arriving today!',
-        amount: '\$1400 USD',
-        deliveryDate: 'Sep 20,2023'),
-  ];
+  final _formKey = GlobalKey<FormState>();
+
+  final TextEditingController _emailBodyController = TextEditingController();
+  final TextEditingController _emailListsController = TextEditingController();
+  bool _isLoading = false;
+  int _successCount = 0;
+  int _failureCount = 0;
+  int _totalEmailsSent = 0;
+
+  Future<void> _submitForm() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+        _successCount = 0;
+        _failureCount = 0;
+      });
+
+      List<String> emailList = _emailListsController.text.split('\n');
+      int batchSize = 10;
+      int delayInMinutes = 15;
+
+      for (int i = 0; i < emailList.length; i += batchSize) {
+        List<String> batch = emailList
+            .sublist(
+                i,
+                i + batchSize > emailList.length
+                    ? emailList.length
+                    : i + batchSize)
+            .where((email) => email.trim().isNotEmpty)
+            .toList();
+
+        await _sendBatch(batch);
+
+        if (i + batchSize < emailList.length) {
+          await Future.delayed(Duration(minutes: delayInMinutes));
+        }
+      }
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      _showResponseDialog();
+    }
+  }
+
+  Future<void> _sendBatch(List<String> batch) async {
+    for (String email in batch) {
+      String endpoint =  'http://18.225.156.117:5000/api/sendsupportIntromail';
+    
+
+      final response = await http.post(
+        Uri.parse(endpoint),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'email_body': _emailBodyController.text,
+          'email': email.trim(),
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _successCount++;
+        });
+      } else {
+        setState(() {
+          _failureCount++;
+        });
+      }
+
+      setState(() {
+        _totalEmailsSent++;
+      });
+    }
+  }
+
+  void _showResponseDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Email Sending Result'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Emails sent successfully: $_successCount'),
+              Text('Emails not successful: $_failureCount'),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  // _emailBodyController.clear();
+                  _emailListsController.clear();
+                });
+                Navigator.of(context).pop();
+              },
+              child: Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildTextFormField(TextEditingController controller, String labelText,
+      {int maxLines = 1}) {
+    return Container(
+      width: 300,
+      margin: EdgeInsets.symmetric(vertical: 8.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15.0),
+        border: Border.all(color: Colors.grey),
+      ),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: labelText,
+          border: InputBorder.none,
+          contentPadding:
+              EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        ),
+        keyboardType: TextInputType.text,
+        maxLines: maxLines,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter $labelText';
+          }
+          return null;
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
 
-    return SlideTransition(
-      position: Tween<Offset>(
-        begin: const Offset(0, 1),
-        end: Offset.zero,
-      ).animate(_slideAnimation),
-      child: Container(
-        height: size.height,
-        color: Color(0xffFBFAF),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        body: Container(
+          color: Colors.white,
+          height: size.height,
+          child: SingleChildScrollView(
+            child: Center(
+              child: Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 20, 0, 0),
-                    child: Text(
-                      "My Profile",
-                      style: TextStyle(
-                        color: Color(0xff00094B),
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  SizedBox(height: 10),
+                  Text(_totalEmailsSent.toString()),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: <Widget>[
+                        // _buildTextFormField(_emailNameController, 'Email Name'),
+                        // _buildTextFormField(_subjectController, 'Subject'),
+                        _buildTextFormField(_emailBodyController, 'Email Body',
+                            maxLines: 5),
+                        _buildTextFormField(
+                            _emailListsController, 'Email Lists',
+                            maxLines: 8),
+                        SizedBox(height: 20),
+                        _isLoading
+                            ? CircularProgressIndicator()
+                            : ElevatedButton(
+                                onPressed: _submitForm,
+                                child: Text('Send'),
+                              ),
+                        SizedBox(height: 20),
+                      ],
                     ),
                   ),
+                  SizedBox(height: 20),
                 ],
               ),
-              SizedBox(height: 50),
-              Row(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(left: 50),
-                    child: CircleAvatar(
-                      radius: 50,
-                      backgroundImage: NetworkImage(widget.telephone),
-                    ),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 10),
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(left: 50),
-                      child: Text(
-                        widget.fullname,
-                        style: TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.w700),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 2),
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(left: 50),
-                      child: Text(
-                        '',
-                        style: TextStyle(
-                            fontSize: 10, fontWeight: FontWeight.w400),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              // Padding(
-              //   padding: EdgeInsets.only(top: 40),
-              //   child: Row(
-              //     children: [
-              //       Padding(
-              //         padding: EdgeInsets.only(left: 30),
-              //         child: CircleAvatar(
-              //           backgroundColor: Color(0xff90DDE8).withOpacity(.1),
-              //           radius: 20,
-              //           child: Center(child: Icon(Icons.edit_outlined)),
-              //         ),
-              //       ),
-              //       Container(
-              //         // height: 50,
-              //         width: size.width / 1.5,
-              //         child: Padding(
-              //           padding: EdgeInsets.only(left: 10),
-              //           child: Text('Edit Profile'),
-              //         ),
-              //       ),
-              //       Text(
-              //         '>',
-              //         style: TextStyle(fontSize: 25),
-              //       ),
-              //     ],
-              //   ),
-              // ),
-
-              // Padding(
-              //   padding: EdgeInsets.only(top: 20),
-              //   child: Row(
-              //     children: [
-              //       Padding(
-              //         padding: EdgeInsets.only(left: 30),
-              //         child: CircleAvatar(
-              //           backgroundColor: Color(0xff90DDE8).withOpacity(.1),
-              //           radius: 20,
-              //           child: Center(
-              //             child: Icon(
-              //               Icons.lock,
-              //             ),
-              //           ),
-              //         ),
-              //       ),
-              //       Container(
-              //         // height: 50,
-              //         width: size.width / 1.5,
-              //         child: Padding(
-              //           padding: EdgeInsets.only(left: 10),
-              //           child: Text('Change Password'),
-              //         ),
-              //       ),
-              //       Text(
-              //         '>',
-              //         style: TextStyle(fontSize: 25),
-              //       ),
-              //     ],
-              //   ),
-              // ),
-              // Padding(
-              //   padding: EdgeInsets.only(top: 20),
-              //   child: Row(
-              //     children: [
-              //       Padding(
-              //         padding: EdgeInsets.only(left: 30),
-              //         child: CircleAvatar(
-              //           backgroundColor: Color(0xff90DDE8).withOpacity(.1),
-              //           radius: 20,
-              //           child: Center(
-              //             child: Icon(
-              //               Icons.location_on,
-              //             ),
-              //           ),
-              //         ),
-              //       ),
-              //       Container(
-              //         // height: 50,
-              //         width: size.width / 1.5,
-              //         child: Padding(
-              //           padding: EdgeInsets.only(left: 10),
-              //           child: Text('Change Location'),
-              //         ),
-              //       ),
-              //       Text(
-              //         '>',
-              //         style: TextStyle(fontSize: 25),
-              //       ),
-              //     ],
-              //   ),
-              // ),
-
-              GestureDetector(
-                onTap: () async {
-                  SharedPreferences prefs =
-                      await SharedPreferences.getInstance();
-                  prefs.clear();
-                  // Navigator.pushReplacement(
-                  //     context,
-                  //     MaterialPageRoute(
-                  //         builder: (buildContext) => ContdPhone()));
-                },
-                child: Padding(
-                  padding: EdgeInsets.only(top: 20),
-                  child: Row(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(left: 30),
-                        child: CircleAvatar(
-                          backgroundColor: Color(0xff90DDE8).withOpacity(.1),
-                          radius: 20,
-                          child: Center(
-                            child: Icon(
-                              Icons.logout,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        // height: 50,
-                        width: size.width / 1.5,
-                        child: Padding(
-                          padding: EdgeInsets.only(left: 10),
-                          child: Text('Log Out'),
-                        ),
-                      ),
-                      Text(
-                        '>',
-                        style: TextStyle(fontSize: 25),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            ],
+            ),
           ),
         ),
       ),
