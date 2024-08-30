@@ -16,7 +16,7 @@ class _GetStartedState extends State<GetStarted> {
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     return Scaffold(
-      backgroundColor: Color(0xffFFFFFF),
+      backgroundColor: ColorStyles.primaryButtonColor,
       body: Container(
           height: size.height,
           width: size.width,
@@ -54,7 +54,7 @@ class _GetStartedState extends State<GetStarted> {
                             );
                           },
                           child: Text(
-                            "Continue with phone number",
+                            "Continue with email",
                             style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.white,

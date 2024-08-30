@@ -1,4 +1,6 @@
 import 'package:readmitpredictor/ui/constants/index.dart';
+import 'package:readmitpredictor/ui/user-taskbar/ProfilePage.dart';
+import 'package:readmitpredictor/ui/user-taskbar/SupportChat.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
@@ -22,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int selectedTabIndex = 0;
   String wallBalance = "0";
   String name = '';
+  String emil = '';
   String phone = '';
   String avatar = '';
   String fundAmount = '';
@@ -34,11 +37,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Future<void> _getName() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     String _name = pref.getString('firstName').toString();
-
+ String _email = pref.getString('email').toString();
     // print("The phone number " + _phone);
 
     setState(() {
-      name = replaceSpaceWithDotAndSpace(_name);
+      name = (_name);
+         emil = replaceSpaceWithDotAndSpace(_email);
     });
   }
 
@@ -47,14 +51,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   List listOfIcons = [
     'assets/vectors/home.png',
-      'assets/vectors/store.png',
+    'assets/vectors/cart.png',
+    'assets/vectors/store.png',
+    'assets/vectors/store.png',
     'assets/vectors/profile.png',
   ];
 
   List<String> listOfLabels = [
     'Home',
-     'Maintenance',
-    'App Intro',
+    'Wishlist',
+    'Hisory',
+    'Support',
+    'Profile',
   ];
 
   getShipmentStatus<String>(tabSelected) {
@@ -286,161 +294,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   PreferredSizeWidget _getAppBarWidget(size) {
     switch (currentIndex) {
       case 0:
-        return PreferredSize(
-          preferredSize: Size.fromHeight(60),
-          child: Container(
-            decoration: BoxDecoration(
-              color: ColorStyles.primaryColor,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.white,
-                  blurRadius: 2.0,
-                  spreadRadius: 1.0,
-                ),
-              ],
-            ),
-            child: SafeArea(
-              child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Column(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.only(left: 5),
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.grey,
-                                  radius: 20,
-                                  backgroundImage:
-                                      AssetImage('assets/vectors/splash.png'),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(left: 15),
-                            child: Text(
-                              'Hi, Ayomide',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  )),
-            ),
-          ),
+        return const PreferredSize(
+          preferredSize: Size.fromHeight(00),
+          child: SizedBox(),
         );
 
       case 1:
-         return PreferredSize(
-          preferredSize: Size.fromHeight(60),
-          child: Container(
-            decoration: BoxDecoration(
-              color: ColorStyles.primaryColor,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.white,
-                  blurRadius: 2.0,
-                  spreadRadius: 1.0,
-                ),
-              ],
-            ),
-            child: SafeArea(
-              child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Column(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.only(left: 5),
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.grey,
-                                  radius: 20,
-                                  backgroundImage:
-                                      AssetImage('assets/vectors/splash.png'),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(left: 15),
-                            child: Text(
-                              'Hi, Ayomide',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  )),
-            ),
-          ),
+        return const PreferredSize(
+          preferredSize: Size.fromHeight(00),
+          child: SizedBox(),
         );
-
       case 2:
-         return PreferredSize(
-          preferredSize: Size.fromHeight(60),
-          child: Container(
-            decoration: BoxDecoration(
-              color: ColorStyles.primaryColor,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.white,
-                  blurRadius: 2.0,
-                  spreadRadius: 1.0,
-                ),
-              ],
-            ),
-            child: SafeArea(
-              child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Column(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.only(left: 5),
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.grey,
-                                  radius: 20,
-                                  backgroundImage:
-                                      AssetImage('assets/vectors/splash.png'),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(left: 15),
-                            child: Text(
-                              'Hi, Ayomide',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  )),
-            ),
-          ),
+      return const PreferredSize(
+          preferredSize: Size.fromHeight(00),
+          child: SizedBox(),
         );
-
       default:
         return PreferredSize(
           child: Container(),
@@ -464,17 +332,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 child: Track(shippingNumber: _shippingNumber),
               )
-            : Home(fullname: 'dee', phone: 'jkswjks');
+            : Home(fullname: name, phone: emil);
         ;
       case 1:
-        return FadeTransition(
+       return FadeTransition(
           opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
             CurvedAnimation(
               parent: ModalRoute.of(context)!.animation!,
               curve: Curves.easeIn,
             ),
           ),
-          child: Orders(fullname: 'dee', phone: 'jkswjks'),
+          child: Wallets(
+        selectedTab: getShipmentStatus(selectedTabIndex),
+              fullname: name,
+              emil: emil,
+              telephone: avatar
+          ),
         );
       case 2:
         return FadeTransition(
@@ -484,9 +357,32 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               curve: Curves.easeIn,
             ),
           ),
-          child: Wallets(
-            fullname: 'dee',
-            phone: 'jkswjks',
+          child:  Orders(phone: emil),
+        );
+         case 3:
+        return FadeTransition(
+          opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+            CurvedAnimation(
+              parent: ModalRoute.of(context)!.animation!,
+              curve: Curves.easeIn,
+            ),
+          ),
+          child:  SupportChat(
+            email:emil,
+            fullname:name
+          ),
+        );
+          case 4:
+        return FadeTransition(
+          opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+            CurvedAnimation(
+              parent: ModalRoute.of(context)!.animation!,
+              curve: Curves.easeIn,
+            ),
+          ),
+          child:  ProfilePage(
+            // email:emil,
+            // fullname:name
           ),
         );
       default:

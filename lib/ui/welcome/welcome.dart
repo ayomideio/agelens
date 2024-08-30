@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:page_view_dot_indicator/page_view_dot_indicator.dart';
 import 'package:readmitpredictor/ui/auth/get-started.dart';
 import 'package:readmitpredictor/ui/auth/signup.dart';
+import 'package:readmitpredictor/ui/constants/index.dart';
 
-import 'package:readmitpredictor/ui/welcome/onboarding.dart';
+
 
 class Welcome extends StatelessWidget {
   const Welcome({Key? key}) : super(key: key);
@@ -91,8 +92,8 @@ class _WelcomePageViewState extends State<WelcomePageView> {
               PageViewDotIndicator(
             currentItem: _currentPageIndex,
             count: 3,
-            unselectedColor: Color(0xff7F7F7F),
-            selectedColor: Color(0xff61E3A5F),
+            unselectedColor: ColorStyles.primaryButtonColor.withOpacity(.7),
+            selectedColor: ColorStyles.primaryButtonColor,
             duration: const Duration(milliseconds: 200),
             boxShape: BoxShape.circle,
             onItemClicked: (index) {

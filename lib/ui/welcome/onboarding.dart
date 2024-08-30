@@ -1,14 +1,14 @@
 class OnBoardingText {
-  static const title1 = "Welcome to PredictCare";
+  static const title1 = "Welcome to Issy Travel";
   static const subTitle1 =
-      "Empower your healthcare  -ReAdmitPredict - for predicting patient re-admission probabilities.";
-  static const lastTitle1 = "";
-  static const title2 = "Predictive Insights";
+      "Your trusted companion for exploring the world's most user-focused captivating destination travel ";
+  static const lastTitle1 = "experience.";
+  static const title2 = "Explore Hidden Gems";
   static const subTitle2 =
-      "Gain valuable insights into patient readmission risks, improve care quality, and enhance hospital efficiency effortlessly,with precision!.";
-  static const lastTitle2 = "";
-  static const title3 = "Stay Informed, Stay Prepared";
+      "Uncover unique attractions, enjoy personalized recommendations,\n  \t  and create unforgettable memories effortlessly.";
+  static const lastTitle2 = " with ease!";
+  static const title3 = "Stay Informed, Stay Adventurous";
   static const subTitle3 =
-      "Experience the power of predictive analytics on-the-go. ReAdmitPredict equips you to manage patient";
-  static const lastTitle3 = "readmission risks, anytime, anywhere.";
+      "Experience the world like never before. Issy Travel equips you with the tools\n       to plan and enjoy your trips";
+  static const lastTitle3 = "anytime, anywhere.";
 }

@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "414238529271",
-    "project_id": "readmit-predictor",
-    "storage_bucket": "readmit-predictor.appspot.com"
+    "project_number": "144014575055",
+    "project_id": "yarsmarketplace",
+    "storage_bucket": "yarsmarketplace.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:414238529271:android:c42eb68810bce18b39a5f2",
+        "mobilesdk_app_id": "1:144014575055:android:6582f50bd6f82750a1feba",
         "android_client_info": {
           "package_name": "com.example.readmitpredictor"
         }
@@ -15,7 +15,45 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDtG9STBp6XG_2R82v3VCsGXkpWvuMIt14"
+          "current_key": "AIzaSyDv7GZgSO8QxH5J8cvOQ9wcrm2oNJAng-A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:144014575055:android:83d4230851a48d42a1feba",
+        "android_client_info": {
+          "package_name": "com.example.yarsmarketplace"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDv7GZgSO8QxH5J8cvOQ9wcrm2oNJAng-A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:144014575055:android:6fddb4ced2728749a1feba",
+        "android_client_info": {
+          "package_name": "com.example.yarsmarketplacevendor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDv7GZgSO8QxH5J8cvOQ9wcrm2oNJAng-A"
         }
       ],
       "services": {

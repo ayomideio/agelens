@@ -71,7 +71,7 @@ class _VerificationSuccessState extends State<VerificationSuccess> {
                 ),
                 child: Center(
                   child: Text(
-                    "Continhue",
+                    "Continue",
                     style: TextStyle(
                         color: ColorStyles.screenColor,
                         fontSize: 14,
