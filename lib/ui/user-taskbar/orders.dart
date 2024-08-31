@@ -77,7 +77,32 @@ class _OrdersState extends State<Orders> {
       ),
     );
   }
+  Map<String, Map<String, String>> _localizedStrings = {
+    'en': {
+      'history': 'History',
+      'status': 'The green checkmark indicates the you already \n toured the location,while the yellow icon indicates \nthe recipient is yet to receive.',
+      'you_want_to_go': 'You Want To Go?',
+      'search_destinations': 'Search Destinations',
+      'recommended': 'Recommended',
+      'view_all': 'View All',
+    },
+    'es': {
+  'history': 'Historia',
+      'status': 'La marca de verificación verde indica que \n ya recorriste la ubicación, mientras que el ícono amarillo indica \nque el destinatario aún no lo ha recibido.',
+      'you_want_to_go': 'Quieres Ir?',
+      'search_destinations': 'Buscar Destinos',
+      'recommended': 'Recomendado',
+      'view_all': 'Ver Todo',
+    },
+  };
 
+  String _selectedLanguage = 'en';
+
+   void _switchLanguage(String languageCode) {
+    setState(() {
+      _selectedLanguage = languageCode;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -94,16 +119,37 @@ class _OrdersState extends State<Orders> {
                   child: Row(
                     children: [
                       Text(
-                        "History",
+                   _localizedStrings[_selectedLanguage]!['history']!,
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.w700),
                       ),
+
+                      SizedBox(width: size.width/3,),
+                           DropdownButton<String>(
+              value: _selectedLanguage,
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  _switchLanguage(newValue);
+                }
+              },
+              items: [
+                DropdownMenuItem(
+                  value: 'en',
+                  child: Text('English'),
+                ),
+                DropdownMenuItem(
+                  value: 'es',
+                  child: Text('Español'),
+                ),
+              ],
+            ),
+         
                     ],
                   )),
               Padding(
                 padding: EdgeInsets.only(top: 2),
                 child: Text(
-                  "The green checkmark indicates the you already \n toured the location,while the yellow icon indicates \nthe recipient is yet to receive.",
+                  _localizedStrings[_selectedLanguage]!['status']!,
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w300,

@@ -1,5 +1,5 @@
 import 'package:readmitpredictor/ui/constants/index.dart';
-import 'package:readmitpredictor/ui/user-taskbar/ProfilePage.dart';
+import 'package:readmitpredictor/ui/user-taskbar/settings.dart';
 import 'package:readmitpredictor/ui/user-taskbar/SupportChat.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,12 +37,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Future<void> _getName() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     String _name = pref.getString('firstName').toString();
- String _email = pref.getString('email').toString();
+    String _email = pref.getString('email').toString();
     // print("The phone number " + _phone);
 
     setState(() {
       name = (_name);
-         emil = replaceSpaceWithDotAndSpace(_email);
+      emil = replaceSpaceWithDotAndSpace(_email);
     });
   }
 
@@ -54,7 +54,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     'assets/vectors/cart.png',
     'assets/vectors/store.png',
     'assets/vectors/store.png',
-    'assets/vectors/profile.png',
+    'assets/vectors/settingsvector.png',
   ];
 
   List<String> listOfLabels = [
@@ -62,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     'Wishlist',
     'Hisory',
     'Support',
-    'Profile',
+    'Settings',
   ];
 
   getShipmentStatus<String>(tabSelected) {
@@ -200,7 +200,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             items: bottomNavBarItems,
             showSelectedLabels: true,
             showUnselectedLabels: true,
-            unselectedItemColor: Colors.black38,
+            unselectedItemColor:  Colors.black38,
             selectedItemColor: Colors.black,
             selectedLabelStyle: TextStyle(
                 color: Color(
@@ -305,16 +305,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           child: SizedBox(),
         );
       case 2:
-      return const PreferredSize(
+        return const PreferredSize(
           preferredSize: Size.fromHeight(00),
           child: SizedBox(),
         );
       default:
-        return PreferredSize(
-          child: Container(),
-          preferredSize: isTextFieldFocused
-              ? Size.fromHeight(size.height / 14)
-              : Size.fromHeight(size.height / 6),
+        return const PreferredSize(
+          preferredSize: Size.fromHeight(00),
+          child: SizedBox(),
         );
     }
   }
@@ -335,7 +333,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             : Home(fullname: name, phone: emil);
         ;
       case 1:
-       return FadeTransition(
+        return FadeTransition(
           opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
             CurvedAnimation(
               parent: ModalRoute.of(context)!.animation!,
@@ -343,11 +341,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
           child: Wallets(
-        selectedTab: getShipmentStatus(selectedTabIndex),
+              selectedTab: getShipmentStatus(selectedTabIndex),
               fullname: name,
               emil: emil,
-              telephone: avatar
-          ),
+              telephone: avatar),
         );
       case 2:
         return FadeTransition(
@@ -357,9 +354,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               curve: Curves.easeIn,
             ),
           ),
-          child:  Orders(phone: emil),
+          child: Orders(phone: emil),
         );
-         case 3:
+      case 3:
         return FadeTransition(
           opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
             CurvedAnimation(
@@ -367,24 +364,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               curve: Curves.easeIn,
             ),
           ),
-          child:  SupportChat(
-            email:emil,
-            fullname:name
-          ),
+          child: SupportChat(email: emil, fullname: name),
         );
-          case 4:
+      case 4:
         return FadeTransition(
-          opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
-            CurvedAnimation(
-              parent: ModalRoute.of(context)!.animation!,
-              curve: Curves.easeIn,
+            opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
+              CurvedAnimation(
+                parent: ModalRoute.of(context)!.animation!,
+                curve: Curves.easeIn,
+              ),
             ),
-          ),
-          child:  ProfilePage(
-            // email:emil,
-            // fullname:name
-          ),
-        );
+            child: SettingsScreen(email: emil, fullname: name));
       default:
         return Container();
     }

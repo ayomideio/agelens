@@ -5,6 +5,7 @@ import 'package:flutterwave_standard/flutterwave.dart';
 import 'package:flutterwave_standard/models/requests/customer.dart';
 import 'package:readmitpredictor/ui/constants/index.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:readmitpredictor/ui/user-taskbar/homescreen.dart';
 import 'package:readmitpredictor/ui/user-taskbar/orders.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:readmitpredictor/ui/user-taskbar/checkout.dart';
@@ -34,7 +35,32 @@ class _WalletsState extends State<Wallets> with SingleTickerProviderStateMixin {
   List selectedi = [];
   final FirebaseFirestore _firestore =
       FirebaseFirestore.instance; // Track selected item IDs
+   Map<String, Map<String, String>> _localizedStrings = {
+    'en': {
+      'wishlist': 'Wishlist',
+      'empty': 'Your Wishlist is Empty',
+      'you_want_to_go': 'You Want To Go?',
+      'search_destinations': 'Search Destinations',
+      'recommended': 'Recommended',
+      'view_all': 'View All',
+    },
+    'es': {
+  'wishlist': 'Lista de deseos',
+      'empty': 'Tu lista de deseos está vacía',
+      'you_want_to_go': 'Quieres Ir?',
+      'search_destinations': 'Buscar Destinos',
+      'recommended': 'Recomendado',
+      'view_all': 'Ver Todo',
+    },
+  };
 
+  String _selectedLanguage = 'en';
+
+   void _switchLanguage(String languageCode) {
+    setState(() {
+      _selectedLanguage = languageCode;
+    });
+  }
   @override
   void initState() {
     super.initState();
@@ -170,7 +196,7 @@ class _WalletsState extends State<Wallets> with SingleTickerProviderStateMixin {
                         height: 300,
                       ),
                       Text(
-                        'Your Wishlist is Empty',
+                           _localizedStrings[_selectedLanguage]!['empty']!,
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
                       )
@@ -201,12 +227,32 @@ class _WalletsState extends State<Wallets> with SingleTickerProviderStateMixin {
                       child: Row(
                         children: [
                           Text(
-                            "Wishlist",
+                              _localizedStrings[_selectedLanguage]!['wishlist']!,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 25,
                             ),
                           ),
+SizedBox(width: size.width/6,),
+                           DropdownButton<String>(
+              value: _selectedLanguage,
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  _switchLanguage(newValue);
+                }
+              },
+              items: [
+                DropdownMenuItem(
+                  value: 'en',
+                  child: Text('English'),
+                ),
+                DropdownMenuItem(
+                  value: 'es',
+                  child: Text('Español'),
+                ),
+              ],
+            ),
+         
                         ],
                       ),
                     ),
@@ -403,8 +449,8 @@ class _WalletsState extends State<Wallets> with SingleTickerProviderStateMixin {
         publicKey: 'FLWPUBK_TEST-38c151bd4006168353f90aa25ffd52dd-X',
         currency: 'USD',
         redirectUrl: 'https://facebook.com',
-        txRef: "${selectedItems.first}",
-        amount:'500',
+        txRef: "${selectedItems.first}-${DateTime.now()}",
+        amount:'30',
         customer: customer,
         paymentOptions: "card",
         customization: Customization(title: "Payment"),
@@ -413,27 +459,37 @@ class _WalletsState extends State<Wallets> with SingleTickerProviderStateMixin {
     // this.showLoading(response.toString());
     
     print("${response.toJson()}");
-    if (response != null && response.status == "success") {
-    print("Payment was successful: ${response.toJson()}");
+ if (response != null && response.status.toString().toLowerCase() == "successful") {
+  print("Payment was successful: ${response.toJson()}");
 
-    // Proceed with deleting the cart item
-    deleteCartItem(selectedItems.first);
- setState((){
-                                  isLoading=false;
-                                });
-                                
-    // Proceed with ordering the item
-    await orderIte(cartItems);
-Navigator.pop(context);
-  } else {
-    print("Payment failed or was canceled: ${response?.toJson()}");
-    setState((){
-                                  isLoading=false;
-                                });
-                                Navigator.pop(context);
-    // Handle failure or cancellation
-    // You can show a message to the user or take other appropriate actions
-  }
+  // Proceed with deleting the cart item
+  deleteCartItem(selectedItems.first);
+
+  setState(() {
+    isLoading = false;
+  });
+
+  // Proceed with ordering the item
+  await orderIte(cartItems);
+  
+   Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomeScreen(),
+                ),
+              );
+} else {
+  print("Payment failed or was canceled: ${response?.toJson()}");
+
+  setState(() {
+    isLoading = false;
+  });
+
+  // Navigator.pop(context);
+
+  // Handle failure or cancellation
+  // You can show a message to the user or take other appropriate actions
+}
                                 
                                 // deleteCartItem(selectedItems.first);
                                 // await orderIte(cartItems);

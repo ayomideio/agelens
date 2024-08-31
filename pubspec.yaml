@@ -50,10 +50,13 @@ dependencies:
   http: ^1.2.1
   mailer: ^6.1.2
   crisp: ^0.2.1
+  intl: ^0.19.0
   flutterwave_standard: ^1.0.8
   shake_gesture: ^1.0.5
   url_launcher: ^6.2.5
   uuid: ^4.4.0
+  fluttertoast: ^8.2.8
+  babstrap_settings_screen: ^0.1.7
 
 dev_dependencies:
   flutter_test:

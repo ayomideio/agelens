@@ -20,6 +20,32 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<Offset> _animation;
   RemoteConfigUpdate? update;
+   Map<String, Map<String, String>> _localizedStrings = {
+    'en': {
+      'hi': 'Hi,',
+      'where_do': 'Where Do',
+      'you_want_to_go': 'You Want To Go?',
+      'search_destinations': 'Search Destinations',
+      'recommended': 'Recommended',
+      'view_all': 'View All',
+    },
+    'es': {
+      'hi': 'Hola,',
+      'where_do': 'Dónde',
+      'you_want_to_go': 'Quieres Ir?',
+      'search_destinations': 'Buscar Destinos',
+      'recommended': 'Recomendado',
+      'view_all': 'Ver Todo',
+    },
+  };
+
+  String _selectedLanguage = 'en';
+
+   void _switchLanguage(String languageCode) {
+    setState(() {
+      _selectedLanguage = languageCode;
+    });
+  }
 
   // Define a default email body text
   final String defaultEmailBody =
@@ -223,6 +249,30 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
+         appBar: AppBar(
+          title: Text(''),
+          actions: [
+            
+            DropdownButton<String>(
+              value: _selectedLanguage,
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  _switchLanguage(newValue);
+                }
+              },
+              items: [
+                DropdownMenuItem(
+                  value: 'en',
+                  child: Text('English'),
+                ),
+                DropdownMenuItem(
+                  value: 'es',
+                  child: Text('Español'),
+                ),
+              ],
+            ),
+          ],
+        ),
         body: Container(
           color: Colors.black,
           height: size.height,
@@ -239,7 +289,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         width: 40,
                       ),
                       Text(
-                        "Hi, ",
+                        _localizedStrings[_selectedLanguage]!['hi']!,
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
@@ -265,7 +315,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         width: 40,
                       ),
                       Text(
-                        "Where Do",
+                        _localizedStrings[_selectedLanguage]!['where_do']!,
                         style: TextStyle(
                           fontSize: 25,
                           fontWeight: FontWeight.w600,
@@ -280,7 +330,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         width: 40,
                       ),
                       Text(
-                        "You Want To Go ?",
+                       _localizedStrings[_selectedLanguage]!['you_want_to_go']!,
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.w900,
@@ -300,7 +350,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         color: Colors.blueAccent,
                       ),
                       decoration: InputDecoration(
-                        hintText: "Search Destinations",
+                        hintText:  _localizedStrings[_selectedLanguage]!['search_destinations']!,
                         fillColor: Colors.white,
                         filled: true,
                         contentPadding:
@@ -340,7 +390,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         width: 20,
                       ),
                       Text(
-                        "Recommended",
+                               _localizedStrings[_selectedLanguage]!['recommended']!,
                         style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 20,
@@ -348,10 +398,10 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                             fontStyle: FontStyle.normal),
                       ),
                       SizedBox(
-                        width: size.width / 2.5,
+                        width: size.width / 3.5,
                       ),
                       Text(
-                        "View All",
+                       _localizedStrings[_selectedLanguage]!['view_all']!,
                         style:
                             TextStyle(fontSize: 14, color: Color(0xff737491)),
                       ),
