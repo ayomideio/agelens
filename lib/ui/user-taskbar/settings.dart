@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:readmitpredictor/currency-converter/screen/home_screen.dart';
+import 'package:readmitpredictor/ui/user-taskbar/privacy-policy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:readmitpredictor/ui/auth/login.dart';
@@ -18,6 +19,33 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   String languageCode = 'en';
+  bool isEmergencyModeOn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEmergencyModeState();
+  }
+
+  Future<void> _loadEmergencyModeState() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isEmergencyModeOn = prefs.getBool('isEmergencyModeOn') ?? false;
+    });
+  }
+
+  Future<void> _toggleEmergencyMode(bool value) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isEmergencyModeOn = value;
+    });
+    await prefs.setBool('isEmergencyModeOn', value);
+
+    if (value) {
+      // Perform the emergency action (e.g., dial a number)
+      await launchUrl(Uri.parse("tel:999"));
+    }
+  }
 
   void _changeLanguage(String code) {
     setState(() {
@@ -78,24 +106,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 items: [
                   SettingsItem(
                     onTap: () {},
-                    icons: CupertinoIcons.pencil_outline,
-                    iconStyle: IconStyle(),
-                    title: Languages.getTranslation('appearance', languageCode),
-                    subtitle: Languages.getTranslation('makeItYours', languageCode),
-                  ),
-                  SettingsItem(
-                    onTap: () {},
-                    icons: Icons.fingerprint,
-                    iconStyle: IconStyle(
-                      iconsColor: Colors.white,
-                      withBackground: true,
-                      backgroundColor: Colors.red,
-                    ),
-                    title: Languages.getTranslation('privacy', languageCode),
-                    subtitle: Languages.getTranslation('improvePrivacy', languageCode),
-                  ),
-                  SettingsItem(
-                    onTap: () {},
                     icons: Icons.dark_mode_rounded,
                     iconStyle: IconStyle(
                       iconsColor: Colors.white,
@@ -105,10 +115,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     title: Languages.getTranslation('emergencyMode', languageCode),
                     subtitle: Languages.getTranslation('automatic', languageCode),
                     trailing: Switch.adaptive(
-                      value: false,
-                      onChanged: (value) async {
-                        await launchUrl(Uri.parse("tel:999"));
-                      },
+                      value: isEmergencyModeOn,
+                      onChanged: _toggleEmergencyMode,
                     ),
                   ),
                 ],
@@ -116,7 +124,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               SettingsGroup(
                 items: [
                   SettingsItem(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => PrivacyPolicyScreen()),
+                      );
+                    },
                     icons: Icons.info_rounded,
                     iconStyle: IconStyle(
                       backgroundColor: Colors.purple,
@@ -131,8 +144,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 items: [
                   SettingsItem(
                     onTap: () async {
-                      SharedPreferences prefs =
-                          await SharedPreferences.getInstance();
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
                       await prefs.clear();
                       Navigator.push(
                         context,

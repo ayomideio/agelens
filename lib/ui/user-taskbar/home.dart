@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:carousel_slider/carousel_slider.dart';
 import 'dart:convert';
-
-import 'package:readmitpredictor/ui/user-taskbar/bookdetails.dart';
 
 class Home extends StatefulWidget {
   final String fullname;
@@ -19,8 +17,11 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<Offset> _animation;
-  RemoteConfigUpdate? update;
-   Map<String, Map<String, String>> _localizedStrings = {
+
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  Map<String, Map<String, String>> _localizedStrings = {
     'en': {
       'hi': 'Hi,',
       'where_do': 'Where Do',
@@ -41,23 +42,12 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   String _selectedLanguage = 'en';
 
-   void _switchLanguage(String languageCode) {
+  void _switchLanguage(String languageCode) {
     setState(() {
       _selectedLanguage = languageCode;
     });
   }
 
-  // Define a default email body text
-  final String defaultEmailBody =
-      "Hello, I am Victor, your personal guide from Shopify. "
-      "I recently came across your store while reviewing the weekly report I received as a certified Shopify partner. "
-      "I must say, I am truly impressed with the exceptional work you have accomplished thus far. "
-      "Upon analyzing your store, I noticed that although you have taken proactive measures to generate sales, "
-      "there seem to be several technical issues hindering the conversion of your daily traffic into customers. "
-      "Glitches, broken links, and bugs are impacting the overall functionality of your store. "
-      "I want to assist in resolving these issues and elevating your store to a higher level. "
-      "By improving the user experience and setting the broken links, we can enhance your ability to convert daily traffic into repeat customers. "
-      "Can I proceed???";
   @override
   void initState() {
     super.initState();
@@ -79,140 +69,30 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         curve: Curves.easeInOut,
       ),
     );
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animationController.forward();
     });
 
-    // Initialize the email body controller with default text
-    _emailBodyController.text = defaultEmailBody;
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text.toLowerCase();
+      });
+    });
   }
 
   @override
   void dispose() {
     _animationController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
-  final _formKey = GlobalKey<FormState>();
-
-  final TextEditingController _emailBodyController = TextEditingController();
-  final TextEditingController _emailListsController = TextEditingController();
-  final TextEditingController _emailNameController = TextEditingController();
-  final TextEditingController _subjectController = TextEditingController();
-  bool _isLoading = false;
-  int _successCount = 0;
-  int _failureCount = 0;
-  int _totalEmailsSent = 0;
-
-  Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-        _successCount = 0;
-        _failureCount = 0;
-      });
-
-      List<String> emailList = _emailListsController.text.split('\n');
-      int batchSize = 10;
-      int delayInMinutes = 5;
-
-      for (int i = 0; i < emailList.length; i += batchSize) {
-        List<String> batch = emailList
-            .sublist(
-                i,
-                i + batchSize > emailList.length
-                    ? emailList.length
-                    : i + batchSize)
-            .where((email) => email.trim().isNotEmpty)
-            .toList();
-
-        await _sendBatch(batch);
-
-        if (i + batchSize < emailList.length) {
-          await Future.delayed(Duration(minutes: delayInMinutes));
-        }
-      }
-
-      setState(() {
-        _isLoading = false;
-      });
-
-      _showResponseDialog();
-    }
-  }
-
-  Future<void> _sendBatch(List<String> batch) async {
-    for (String email in batch) {
-      String endpoint = '';
-      if (_totalEmailsSent >= 2000) {
-        endpoint = 'http://18.225.156.117:5000/api/sendsupportIntromail';
-      } else if (_totalEmailsSent >= 1000) {
-        endpoint = 'http://18.225.156.117:5000/api/sendmaintenancemail';
-      } else {
-        endpoint = 'http://18.225.156.117:5000/api/sendsupportmail';
-      }
-
-      final response = await http.post(
-        Uri.parse(endpoint),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, dynamic>{
-          'email_name': _emailNameController.text,
-          'subject': _subjectController.text,
-          'email_body': _emailBodyController.text,
-          'email': email.trim(),
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        setState(() {
-          _successCount++;
-        });
-      } else {
-        setState(() {
-          _failureCount++;
-        });
-      }
-
-      setState(() {
-        _totalEmailsSent++;
-      });
-    }
-  }
-
-  void _showResponseDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Email Sending Result'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Emails sent successfully: $_successCount'),
-              Text('Emails not successful: $_failureCount'),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  // _emailBodyController.clear();
-                  _emailListsController.clear();
-                });
-                Navigator.of(context).pop();
-              },
-              child: Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildTextFormField(TextEditingController controller, String labelText,
-      {int maxLines = 1}) {
+  Widget _buildTextFormField(
+    TextEditingController controller,
+    String labelText, {
+    int maxLines = 1,
+  }) {
     return Container(
       width: 300,
       margin: EdgeInsets.symmetric(vertical: 8.0),
@@ -249,10 +129,9 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
-         appBar: AppBar(
+        appBar: AppBar(
           title: Text(''),
           actions: [
-            
             DropdownButton<String>(
               value: _selectedLanguage,
               onChanged: (String? newValue) {
@@ -330,7 +209,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         width: 40,
                       ),
                       Text(
-                       _localizedStrings[_selectedLanguage]!['you_want_to_go']!,
+                        _localizedStrings[_selectedLanguage]![
+                            'you_want_to_go']!,
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.w900,
@@ -345,12 +225,14 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   Container(
                     width: 300,
                     child: TextField(
+                      controller: _searchController,
                       style: TextStyle(
                         fontSize: 15.0,
                         color: Colors.blueAccent,
                       ),
                       decoration: InputDecoration(
-                        hintText:  _localizedStrings[_selectedLanguage]!['search_destinations']!,
+                        hintText: _localizedStrings[_selectedLanguage]![
+                            'search_destinations']!,
                         fillColor: Colors.white,
                         filled: true,
                         contentPadding:
@@ -372,15 +254,6 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       ),
                     ),
                   ),
-                  // Row(
-                  //   children: [
-                  //     TextField(
-                  //       decoration: InputDecoration(
-                  //         prefixIcon: Icon(Icons.done),
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
                   SizedBox(
                     height: 70,
                   ),
@@ -390,7 +263,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                         width: 20,
                       ),
                       Text(
-                               _localizedStrings[_selectedLanguage]!['recommended']!,
+                        _localizedStrings[_selectedLanguage]!['recommended']!,
                         style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 20,
@@ -400,128 +273,232 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                       SizedBox(
                         width: size.width / 3.5,
                       ),
-                      Text(
-                       _localizedStrings[_selectedLanguage]!['view_all']!,
+                      InkWell(onTap: () {
+                        setState(() {
+                          _searchQuery = '';
+                        });
+                      },
+                      child: Text(
+                        _localizedStrings[_selectedLanguage]!['view_all']!,
                         style:
                             TextStyle(fontSize: 14, color: Color(0xff737491)),
+                      ) ,
                       ),
+                     
                     ],
                   ),
                   SizedBox(
                     height: 50,
                   ),
-          SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('triplocale').snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
-          }
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('triplocale')
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return Center(child: CircularProgressIndicator());
+                        }
 
-          final locations = snapshot.data!.docs;
+                        final locations = snapshot.data!.docs;
 
-          return Row(
-            children: locations.map((doc) {
-              var data = doc.data() as Map<String, dynamic>;
+                        final filteredLocations = locations.where((doc) {
+                          var data = doc.data() as Map<String, dynamic>;
+                          String productName = data['productName'] ?? '';
+                          return productName
+                              .toLowerCase()
+                              .contains(_searchQuery);
+                        }).toList();
 
-              // Using null-aware operators to prevent the null exception
-              String productName = data['productName'] ?? 'Unknown Location';
-              String productDescription = data['productDescription'] ?? 'No Description';
-              String productImage = data['productImage'][0] ?? '';
-              List<String> productImages = List<String>.from(data['productImage'] ?? []);
-              String price = data['price']?.toString() ?? '0';
-              String vendorId = data['vendorId'] ?? '';
-              String vendorName = data['vendorName'] ?? 'Unknown Vendor';
-              String location = data['location'] ?? 'Unknown';
+                        if (filteredLocations.isEmpty) {
+                          return Center(child: Text('No results found'));
+                        }
 
-              return GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => LocationDetails(
-                        price: double.parse(price),
-                        productDescription: productDescription,
-                        productImage: productImages,
-                        productName: productName,
-                        vendorId: vendorId,
-                        vendorName: vendorName,
-                        location:location
-                      ),
-                    ),
-                  );
-                },
-                child: Container(
-                  height: 220,
-                  width: 300,
-                  margin: EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    image: DecorationImage(
-                      image: productImage.isNotEmpty
-                          ? NetworkImage(productImage)
-                          : AssetImage('assets/vectors/default_image.jpg') as ImageProvider,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        bottom: 0,
-                        child: Container(
-                          color: Colors.black.withOpacity(.5),
-                          width: 300,
-                          height: 80,
-                          child: Padding(
-                            padding: EdgeInsets.all(10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  productName,
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
+                        return Row(
+                          children: filteredLocations.map((doc) {
+                            var data = doc.data() as Map<String, dynamic>;
+
+                            String productName =
+                                data['productName'] ?? 'Unknown Location';
+                            String productDescription =
+                                data['productDescription'] ?? 'No Description';
+                            String productImage = data['productImage'][0] ?? '';
+                            List<String> productImages =
+                                List<String>.from(data['productImage'] ?? []);
+                            String price = data['price']?.toString() ?? '0';
+                            String vendorId = data['vendorId'] ?? '';
+                            String vendorName =
+                                data['vendorName'] ?? 'Unknown Vendor';
+                            String location = data['location'] ?? 'Unknown';
+
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => LocationDetails(
+                                      price: double.parse(price),
+                                      productDescription: productDescription,
+                                      productImage: productImages,
+                                      productName: productName,
+                                      vendorId: vendorId,
+                                      vendorName: vendorName,
+                                      location: location,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                height: 220,
+                                width: 300,
+                                margin: EdgeInsets.symmetric(horizontal: 10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                  image: DecorationImage(
+                                    image: NetworkImage(productImage),
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
-                                Row(
-                                  children: [
-                                    Icon(Icons.star, color: Colors.yellow, size: 15),
-                                    Icon(Icons.star, color: Colors.yellow, size: 15),
-                                    Icon(Icons.star, color: Colors.yellow, size: 15),
-                                    Icon(Icons.star, color: Colors.yellow, size: 15),
-                                    Icon(Icons.star, color: Colors.yellow, size: 15),
-                                    SizedBox(width: 5),
-                                    Text(
-                                      '5.0',
-                                      style: TextStyle(
+                                child: Container(
+                                  alignment: Alignment.bottomLeft,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Colors.transparent,
+                                        Colors.black.withOpacity(0.7)
+                                      ],
+                                    ),
+                                  ),
+                                  padding: EdgeInsets.all(10),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        productName,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
                                           color: Colors.white,
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold),
-                                    )
-                                  ],
+                                        ),
+                                      ),
+                                      Text(
+                                        '\$$price',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      },
+                    ),
                   ),
-                ),
-              );
-            }).toList(),
-          );
-        },
-      ),
-    )
                 ],
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class LocationDetails extends StatelessWidget {
+  final String productName;
+  final String productDescription;
+  final List<String> productImage;
+  final double price;
+  final String vendorId;
+  final String vendorName;
+  final String location;
+
+  const LocationDetails({
+    required this.productName,
+    required this.productDescription,
+    required this.productImage,
+    required this.price,
+    required this.vendorId,
+    required this.vendorName,
+    required this.location,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(productName),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CarouselSlider(
+              options: CarouselOptions(height: 400.0),
+              items: productImage.map((image) {
+                return Builder(
+                  builder: (BuildContext context) {
+                    return Container(
+                      width: MediaQuery.of(context).size.width,
+                      margin: EdgeInsets.symmetric(horizontal: 5.0),
+                      decoration: BoxDecoration(color: Colors.amber),
+                      child: Image.network(image, fit: BoxFit.cover),
+                    );
+                  },
+                );
+              }).toList(),
+            ),
+            Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                productName,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                productDescription,
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                '\$$price',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                'Vendor: $vendorName',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                'Location: $location',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
         ),
       ),
     );
