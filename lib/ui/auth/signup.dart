@@ -211,7 +211,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'phoneNumber': '',
         'address': '',
         'location': '',
-        'trips':[]
+        'trips':[],
+        'orders':[],
       });
 
             if (user != null && !user.emailVerified) {

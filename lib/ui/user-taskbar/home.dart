@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:carousel_slider/carousel_slider.dart';
 import 'dart:convert';
 
+import 'package:readmitpredictor/ui/user-taskbar/bookdetails.dart';
+
 class Home extends StatefulWidget {
   final String fullname;
   final String phone;
@@ -337,7 +339,7 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => LocationDetails(
+                                    builder: (context) => LocationDetails2(
                                       price: double.parse(price),
                                       productDescription: productDescription,
                                       productImage: productImages,

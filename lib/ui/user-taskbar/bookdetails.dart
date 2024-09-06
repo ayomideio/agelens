@@ -5,11 +5,11 @@ import 'package:readmitpredictor/ui/user-taskbar/wallets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
-class LocationDetails extends StatefulWidget {
+class LocationDetails2 extends StatefulWidget {
   final String vendorName, vendorId, productName, productDescription, location;
   final double price;
   final List<String> productImage;
-  const LocationDetails(
+  const LocationDetails2(
       {super.key,
       required this.vendorName,
       required this.vendorId,
@@ -20,10 +20,10 @@ class LocationDetails extends StatefulWidget {
       required this.location});
 
   @override
-  State<LocationDetails> createState() => _LocationDetailsState();
+  State<LocationDetails2> createState() => _LocationDetails2State();
 }
 
-class _LocationDetailsState extends State<LocationDetails> {
+class _LocationDetails2State extends State<LocationDetails2> {
   List<Map<String, dynamic>> cart = [];
   int _quantity = 1;
   int _currentPage = 0;
