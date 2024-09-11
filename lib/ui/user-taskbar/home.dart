@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:readmitpredictor/min.dart';
 import 'dart:convert';
 
 import 'package:readmitpredictor/ui/user-taskbar/bookdetails.dart';
@@ -26,8 +27,8 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
   Map<String, Map<String, String>> _localizedStrings = {
     'en': {
       'hi': 'Hi,',
-      'where_do': 'Where Do',
-      'you_want_to_go': 'You Want To Go?',
+      'where_do': 'Let us',
+      'you_want_to_go': 'Detect Your Age',
       'search_destinations': 'Search Destinations',
       'recommended': 'Recommended',
       'view_all': 'View All',
@@ -131,29 +132,29 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(''),
-          actions: [
-            DropdownButton<String>(
-              value: _selectedLanguage,
-              onChanged: (String? newValue) {
-                if (newValue != null) {
-                  _switchLanguage(newValue);
-                }
-              },
-              items: [
-                DropdownMenuItem(
-                  value: 'en',
-                  child: Text('English'),
-                ),
-                DropdownMenuItem(
-                  value: 'es',
-                  child: Text('Español'),
-                ),
-              ],
-            ),
-          ],
-        ),
+        // appBar: AppBar(
+        //   title: Text(''),
+        //   actions: [
+        //     DropdownButton<String>(
+        //       value: _selectedLanguage,
+        //       onChanged: (String? newValue) {
+        //         if (newValue != null) {
+        //           _switchLanguage(newValue);
+        //         }
+        //       },
+        //       items: [
+        //         DropdownMenuItem(
+        //           value: 'en',
+        //           child: Text('English'),
+        //         ),
+        //         DropdownMenuItem(
+        //           value: 'es',
+        //           child: Text('Español'),
+        //         ),
+        //       ],
+        //     ),
+        //   ],
+        // ),
         body: Container(
           color: Colors.black,
           height: size.height,
@@ -224,190 +225,45 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   SizedBox(
                     height: 40,
                   ),
-                  Container(
-                    width: 300,
-                    child: TextField(
-                      controller: _searchController,
-                      style: TextStyle(
-                        fontSize: 15.0,
-                        color: Colors.blueAccent,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: _localizedStrings[_selectedLanguage]![
-                            'search_destinations']!,
-                        fillColor: Colors.white,
-                        filled: true,
-                        contentPadding:
-                            EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          borderSide:
-                              BorderSide(color: Colors.white, width: 50.0),
-                        ),
-                        suffixIcon: CircleAvatar(
-                          radius: 20,
-                          backgroundColor: Colors.white,
-                          child: IconButton(
-                            onPressed: () {},
-                            icon: Icon(Icons.search),
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  // Container(
+                  //   width: 300,
+                  //   child: TextField(
+                  //     controller: _searchController,
+                  //     style: TextStyle(
+                  //       fontSize: 15.0,
+                  //       color: Colors.blueAccent,
+                  //     ),
+                  //     decoration: InputDecoration(
+                  //       hintText: _localizedStrings[_selectedLanguage]![
+                  //           'search_destinations']!,
+                  //       fillColor: Colors.white,
+                  //       filled: true,
+                  //       contentPadding:
+                  //           EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
+                  //       border: OutlineInputBorder(
+                  //         borderRadius: BorderRadius.circular(20),
+                  //         borderSide:
+                  //             BorderSide(color: Colors.white, width: 50.0),
+                  //       ),
+                  //       suffixIcon: CircleAvatar(
+                  //         radius: 20,
+                  //         backgroundColor: Colors.white,
+                  //         child: IconButton(
+                  //           onPressed: () {},
+                  //           icon: Icon(Icons.search),
+                  //           color: Colors.black,
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
+                  
                   SizedBox(
                     height: 70,
                   ),
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 20,
-                      ),
-                      Text(
-                        _localizedStrings[_selectedLanguage]!['recommended']!,
-                        style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 20,
-                            color: Color(0xff737491),
-                            fontStyle: FontStyle.normal),
-                      ),
-                      SizedBox(
-                        width: size.width / 3.5,
-                      ),
-                      InkWell(onTap: () {
-                        setState(() {
-                          _searchQuery = '';
-                        });
-                      },
-                      child: Text(
-                        _localizedStrings[_selectedLanguage]!['view_all']!,
-                        style:
-                            TextStyle(fontSize: 14, color: Color(0xff737491)),
-                      ) ,
-                      ),
-                     
-                    ],
-                  ),
-                  SizedBox(
-                    height: 50,
-                  ),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('triplocale')
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) {
-                          return Center(child: CircularProgressIndicator());
-                        }
-
-                        final locations = snapshot.data!.docs;
-
-                        final filteredLocations = locations.where((doc) {
-                          var data = doc.data() as Map<String, dynamic>;
-                          String productName = data['productName'] ?? '';
-                          return productName
-                              .toLowerCase()
-                              .contains(_searchQuery);
-                        }).toList();
-
-                        if (filteredLocations.isEmpty) {
-                          return Center(child: Text('No results found'));
-                        }
-
-                        return Row(
-                          children: filteredLocations.map((doc) {
-                            var data = doc.data() as Map<String, dynamic>;
-
-                            String productName =
-                                data['productName'] ?? 'Unknown Location';
-                            String productDescription =
-                                data['productDescription'] ?? 'No Description';
-                            String productImage = data['productImage'][0] ?? '';
-                            List<String> productImages =
-                                List<String>.from(data['productImage'] ?? []);
-                            String price = data['price']?.toString() ?? '0';
-                            String vendorId = data['vendorId'] ?? '';
-                            String vendorName =
-                                data['vendorName'] ?? 'Unknown Vendor';
-                            String location = data['location'] ?? 'Unknown';
-
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => LocationDetails2(
-                                      price: double.parse(price),
-                                      productDescription: productDescription,
-                                      productImage: productImages,
-                                      productName: productName,
-                                      vendorId: vendorId,
-                                      vendorName: vendorName,
-                                      location: location,
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                height: 220,
-                                width: 300,
-                                margin: EdgeInsets.symmetric(horizontal: 10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(20),
-                                  image: DecorationImage(
-                                    image: NetworkImage(productImage),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                child: Container(
-                                  alignment: Alignment.bottomLeft,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [
-                                        Colors.transparent,
-                                        Colors.black.withOpacity(0.7)
-                                      ],
-                                    ),
-                                  ),
-                                  padding: EdgeInsets.all(10),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        productName,
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                      Text(
-                                        '\$$price',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        );
-                      },
-                    ),
-                  ),
+              
+                  AgeDetectorScreen()
+                 
                 ],
               ),
             ),

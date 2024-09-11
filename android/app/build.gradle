@@ -61,7 +61,15 @@ kotlinOptions {
 flutter {
     source = "../.."
 }
+configurations.all {
+    resolutionStrategy {
+        force 'com.squareup.okhttp:okhttp:2.7.5'
+        force 'com.squareup.okio:okio:1.17.5'
+    }
+}
 
 dependencies {
     implementation platform('com.google.firebase:firebase-bom:31.2.3')  
+    implementation 'com.google.firebase:firebase-functions-ktx'
+implementation 'com.google.firebase:firebase-messaging'
 }

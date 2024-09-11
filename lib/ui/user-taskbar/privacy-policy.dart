@@ -1,56 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:readmitpredictor/ui/auth/login.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Privacy Policy', style: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.teal,
-      ),
+      // appBar: AppBar(
+      //   title: Text('Privacy Policy', style: TextStyle(fontFamily: 'Roboto', fontWeight: FontWeight.bold)),
+      //   backgroundColor: Colors.black,
+      // ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SizedBox(height: 40,),
             Text(
-              'Welcome to Issy Tour!',
+              'Welcome to AgeLens!',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.teal.shade700,
+                color: Colors.black,
               ),
             ),
             SizedBox(height: 16),
             Text(
-              'At Issy Tour, we are committed to protecting your privacy. This policy outlines how we collect, use, and safeguard your personal information.',
+              'At AgeLens, we are committed to protecting your privacy. This policy outlines how we collect, use, and safeguard your personal information.',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 16),
             _buildSectionTitle('Information Collection and Use'),
             Text(
-              'We collect information to provide a better experience for all our users. This includes information you provide directly to us when booking tours or making payments, as well as data collected through your usage of the app.',
+              'We collect information to provide a better experience for all our users. This includes the data you provide directly through our facial analysis feature, as well as information collected through your usage of the app.',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 16),
             _buildSectionTitle('How We Use Your Information'),
             Text(
-              '• To process and confirm your bookings.\n'
-              '• To facilitate payments and generate tickets.\n'
-              '• To provide currency conversion services.\n'
-              '• To improve the functionality and user experience of the app.',
+              '• To analyze and predict your age based on facial appearance.\n'
+              '• To improve the accuracy of our age prediction models.\n'
+              '• To provide personalized insights and age comparison features.\n'
+              '• To enhance the functionality and user experience of AgeLens.',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 16),
             _buildSectionTitle('Data Security'),
             Text(
-              'We implement appropriate security measures to protect your data from unauthorized access, alteration, or destruction.',
+              'We implement robust security measures to protect your data from unauthorized access, alteration, or destruction.',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 16),
             _buildSectionTitle('Third-Party Services'),
             Text(
-              'We may share your information with third-party services for processing payments, booking management, and other necessary operations. These services are obligated to maintain the confidentiality of your data.',
+              'We may share your information with third-party services for data analysis and to improve our app’s performance. These services are obligated to maintain the confidentiality of your data.',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 16),
@@ -62,23 +65,27 @@ class PrivacyPolicyScreen extends StatelessWidget {
             SizedBox(height: 16),
             _buildSectionTitle('Changes to This Policy'),
             Text(
-              'We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new policy on this page.',
+              'We may update this Privacy Policy from time to time. We will notify you of any changes by posting the updated policy on this page.',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 16),
             Text(
-              'If you have any questions about this Privacy Policy, please contact us at support@Issytour.com.',
+              'If you have any questions about this Privacy Policy, please contact us at support@AgeLens.com.',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 24),
             Center(
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
+                onPressed: () async{
+               SharedPreferences prefs = await SharedPreferences.getInstance();
+                      await prefs.clear();
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                      );
                 },
-                child: Text('Back', style: TextStyle(fontSize: 18)),
+                child: Text('Log Out', style: TextStyle(fontSize: 18)),
                 style: ElevatedButton.styleFrom(
-               
                   padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -98,7 +105,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
       style: TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.bold,
-        color: Colors.teal.shade600,
+        color: Colors.black,
       ),
     );
   }

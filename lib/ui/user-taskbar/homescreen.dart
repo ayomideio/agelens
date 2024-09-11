@@ -1,4 +1,5 @@
 import 'package:readmitpredictor/ui/constants/index.dart';
+import 'package:readmitpredictor/ui/user-taskbar/privacy-policy.dart';
 import 'package:readmitpredictor/ui/user-taskbar/settings.dart';
 import 'package:readmitpredictor/ui/user-taskbar/SupportChat.dart';
 
@@ -51,18 +52,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   List listOfIcons = [
     'assets/vectors/home.png',
-    'assets/vectors/cart.png',
-    'assets/vectors/store.png',
-    'assets/vectors/store.png',
+    
     'assets/vectors/settingsvector.png',
   ];
 
   List<String> listOfLabels = [
     'Home',
-    'Wishlist',
-    'Hisory',
-    'Support',
-    'Settings',
+    // 'Wishlist',
+    // 'Hisory',
+    // 'Support',
+    'About',
   ];
 
   getShipmentStatus<String>(tabSelected) {
@@ -340,12 +339,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               curve: Curves.easeIn,
             ),
           ),
-          child: Wallets(
-              selectedTab: getShipmentStatus(selectedTabIndex),
-              fullname: name,
-              emil: emil,
-              telephone: avatar),
-        );
+          child: PrivacyPolicyScreen());
+        //   Wallets(
+        //       selectedTab: getShipmentStatus(selectedTabIndex),
+        //       fullname: name,
+        //       emil: emil,
+        //       telephone: avatar),
+        // );
       case 2:
         return FadeTransition(
           opacity: Tween<double>(begin: 0.0, end: 1.0).animate(

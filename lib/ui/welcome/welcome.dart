@@ -76,7 +76,7 @@ class _WelcomePageViewState extends State<WelcomePageView> {
                 lastTitle: OnBoardingText.lastTitle2,
               ),
               WelcomePage(
-                imageAsset: "assets/vectors/onb3.png",
+                imageAsset: "assets/vectors/onb1.png",
                 title: OnBoardingText.title3,
                 subTitle: OnBoardingText.subTitle3,
                 lastTitle: OnBoardingText.lastTitle3,

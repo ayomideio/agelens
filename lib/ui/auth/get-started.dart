@@ -27,7 +27,7 @@ class _GetStartedState extends State<GetStarted> {
               children: [
                 SizedBox(height: 50,),
                 Image.asset(
-                  "assets/vectors/onb3.png",
+                  "assets/vectors/onb1.png",
                   height: 200,
                 ),
                 SizedBox(

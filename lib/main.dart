@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
+import 'package:readmitpredictor/min.dart';
 import 'package:readmitpredictor/ui/user-taskbar/homescreen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:readmitpredictor/ui/welcome/splashscreen.dart';
@@ -17,6 +19,7 @@ void main() async {
     storageBucket: 'yarsmarketplace.appspot.com',
   ));
   SharedPreferences prefs = await SharedPreferences.getInstance();
+  prefs.clear();
 
   runApp(
     MyApp(
@@ -43,28 +46,31 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return ShakeGesture(
-        onShake: () {
-          print("shaked");
-          setState(() {
-            _shakeCount++;
-            if (_shakeCount >= 5) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Calling')),
-              );
-              _makeEmergencyCall();
-              _shakeCount = 0; // Reset the shake count after dialing
-            }
-          });
-        },
-        child: MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Issy Travel',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        fontFamily: 'Poppins',
-        useMaterial3: true,
-      ),
-      home: SplashScreen(),
+      onShake: () {
+        print("shaked");
+        setState(() {
+          _shakeCount++;
+          if (_shakeCount >= 5) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Calling')),
+            );
+            _makeEmergencyCall();
+            _shakeCount = 0; // Reset the shake count after dialing
+          }
+        });
+      },
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'AgeLens',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          fontFamily: 'Poppins',
+          useMaterial3: true,
+        ),
+        home: 
+        // AgeDetectorScreen()
+        
+        SplashScreen(),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:readmitpredictor/ui/auth/login.dart';
 import 'package:readmitpredictor/ui/auth/verifyemail.dart';
 import 'package:readmitpredictor/ui/auth/verifyphone.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -129,7 +130,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
                 SizedBox(height: 20),
+                
                 _buildSignUpButton(context),
+
                 SizedBox(height: 20),
                 _buildLoginText(context),
               ],
@@ -203,10 +206,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
             User? user = userCredential.user;
                final firestoreInstance = FirebaseFirestore.instance;
 
+
       // Add document to a collection (e.g., 'users')
-      await firestoreInstance.collection('user').doc(email).set({
+       firestoreInstance.collection('user').doc(user?.email.toString()).set({
         'fullName': firstname,
-        'email': email,
+        'email':user?.email.toString(),
         'password': password,
         'phoneNumber': '',
         'address': '',
@@ -218,25 +222,29 @@ class _SignUpScreenState extends State<SignUpScreen> {
             if (user != null && !user.emailVerified) {
               // await user.sendEmailVerification();
               await _sendVerificationCode(user.email.toString());
-              // ScaffoldMessenger.of(context).showSnackBar(
-              //   SnackBar(
-              //       content: Text(
-              //           'Verification email sent. Please check your inbox.')),
-              // );
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content: Text(
+                        'Verification email sent. Please check your inbox.')),
+              );
 
               // Navigate to the VerificationSuccess screen
               SharedPreferences prefs = await SharedPreferences.getInstance();
             prefs.setString('firstName', firstname);
             prefs.setString('lastName', lastname);
             prefs.setString('email', email);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => VerifyEmailScreen(
-                    email: user.email.toString(),
-                  ),
-                ),
-              );
+               Navigator.push(
+          context,
+          MaterialPageRoute(builder: (BuildContext build) => VerificationSuccess()),
+        );
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => VerifyEmailScreen(
+              //       email: user.email.toString(),
+              //     ),
+              //   ),
+              // );
             }
 
             
@@ -273,10 +281,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget _buildLoginText(BuildContext context) {
     return InkWell(
       onTap: () {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (BuildContext build) => LoginScreen()),
-        // );
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (BuildContext build) => LoginScreen()),
+        );
       },
       child: RichText(
         text: TextSpan(
